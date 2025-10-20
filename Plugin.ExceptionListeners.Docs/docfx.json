@@ -1,0 +1,46 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["Plugin.ExceptionListeners.csproj"],
+          "src": "../Plugin.ExceptionListeners"
+        },
+        {
+          "files": ["Plugin.ExceptionListeners.Maui.csproj"],
+          "src": "../Plugin.ExceptionListeners.Maui"
+        }
+      ],
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "noBuild": true,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "apiFilter": "public"
+    }
+  ],
+  "build": {
+    "content": [{ "files": "**/*.{md,yml}" }, "toc.yml"],
+    "globalMetadata": {
+      "_appName": "Plugin.ExceptionListeners Documentation",
+      "_appTitle": "Plugin.ExceptionListeners",
+      "_enableSearch": true,
+      "_appFooter": "By Francois Raminosona - Licensed under the MIT License",
+      "_disableContribution": false,
+      "pdf": false
+    },
+    "sitemap": {
+      "baseUrl": "https://framinosona.github.io/Plugin.ExceptionListeners/",
+      "priority": 0.1,
+      "changefreq": "monthly"
+    },
+    "template": ["default", "modern"]
+  },
+  "serve": {
+    "host": "localhost",
+    "port": 8080
+  }
+}

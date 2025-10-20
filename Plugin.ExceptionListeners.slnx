@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Plugin.ExceptionListeners/Plugin.ExceptionListeners.csproj" />
+  <Project Path="Plugin.ExceptionListeners.Maui/Plugin.ExceptionListeners.Maui.csproj" />
+  <Project Path="Plugin.ExceptionListeners.Tests/Plugin.ExceptionListeners.Tests.csproj" />
+</Solution>

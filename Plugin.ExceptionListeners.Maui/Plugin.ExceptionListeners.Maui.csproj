@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ==================== CORE VARIABLES ==================== -->
+  <PropertyGroup>
+    <Project_Name>Plugin.ExceptionListeners.Maui</Project_Name>
+    <Project_Tags>Plugin;ExceptionListeners;Tools;Toolkit;MAUI</Project_Tags>
+    <Project_Copyright>Francois Raminosona</Project_Copyright>
+    <Project_Description>Plugin.ExceptionListeners for .NET MAUI</Project_Description>
+  </PropertyGroup>
+
+  <!-- ==================== TARGET FRAMEWORKS ==================== -->
+  <PropertyGroup>
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-ios</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <!-- ==================== MAUI ==================== -->
+  <PropertyGroup>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+  </PropertyGroup>
+
+  <!-- ==================== PACKAGE REFERENCES / DEPENDENCIES ==================== -->
+  <ItemGroup Condition=" '$(ContinuousIntegrationBuild)' != 'true' ">
+    <ProjectReference Include="..\Plugin.ExceptionListeners\Plugin.ExceptionListeners.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">
+    <PackageReference Include="Plugin.ExceptionListeners" />
+  </ItemGroup>
+
+
+</Project>
