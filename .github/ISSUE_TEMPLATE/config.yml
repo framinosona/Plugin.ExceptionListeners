@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a Question or Get Help
+    url: https://github.com/framinosona/Plugin.ExceptionListeners/discussions
+    about: Ask questions, share ideas, or get help using GitHub Discussions
+  - name: 🔒 Security Issue
+    url: https://github.com/framinosona/Plugin.ExceptionListeners/security/advisories/new
+    about: Report a security vulnerability privately
+  - name: 📚 Documentation
+    url: https://framinosona.github.io/Plugin.ExceptionListeners/
+    about: Read the main documentation and API reference

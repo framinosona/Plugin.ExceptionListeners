@@ -1,0 +1,258 @@
+name: CI
+run-name: >-
+  ${{ github.event_name == 'pull_request' &&
+      format('🏗 {0} - {1} → {2} by {3}', github.event_name, github.head_ref, github.base_ref, github.actor) ||
+      format('🏗 {0} - {1} - {2} by {3}', github.event_name, github.ref_name, github.sha, github.actor) }}
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+  pull_request:
+    branches: [ main, master ]
+    paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+
+permissions:
+  contents: write       # Needed to create tags and releases
+  packages: write       # Needed if publishing packages
+  actions: read         # Needed to read workflow artifacts
+  checks: write         # Needed to create check runs for code coverage (EnricoMi/publish-unit-test-result-action requires this)
+  id-token: write       # Needed to authenticate with GitHub CLI
+  pages: write          # Needed to deploy to GitHub Pages
+  pull-requests: write  # Needed to post comments on PRs (EnricoMi/publish-unit-test-result-action requires this)
+  issues: read          # Needed to read issues (EnricoMi/publish-unit-test-result-action requires this)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+  VERSION_MAJOR: '1'
+  VERSION_MINOR: '0'
+  PROJECT_NAME: Plugin.ExceptionListeners
+
+jobs:
+  calculate-version:
+    name: '🔍 Calculate Version'
+    runs-on: ubuntu-latest
+    outputs:
+      FULL_VERSION: ${{ steps.version.outputs.FULL_VERSION }}
+      MAJOR: ${{ steps.version.outputs.MAJOR }}
+      MINOR: ${{ steps.version.outputs.MINOR }}
+      PATCH: ${{ steps.version.outputs.PATCH }}
+    steps:
+      - name: '🔄 Checkout'
+        uses: actions/checkout@v5
+        with:
+          fetch-tags: true # https://github.com/actions/checkout/issues/1471#issuecomment-1771231294
+          fetch-depth: 0
+
+      # ============================ VERSION ============================
+      - name: '🔍 Calculate version'
+        id: version
+        run: |
+          echo "🔍 Calculating next version for ${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.x"
+
+          PATTERN="v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.*"
+          echo "📋 Looking for existing tags matching pattern: $PATTERN"
+
+          # List all matching tags for debugging
+          echo "🔍 All tags matching pattern:"
+          git tag -l "$PATTERN" || echo "No tags found"
+
+          TAGS=$(git tag -l "v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.*")
+          if [ -z "$TAGS" ]; then
+            echo "ℹ️  No existing tags found for ${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.x, starting with patch 0"
+            NEXT_PATCH=0
+          else
+            LATEST_PATCH=$(echo "$TAGS" | grep -E "^v${{ env.VERSION_MAJOR }}\.${{ env.VERSION_MINOR }}\.[0-9]+$" | sed "s/^v${{ env.VERSION_MAJOR }}\.${{ env.VERSION_MINOR }}\.//" | sort -n | tail -1)
+            if [ -z "$LATEST_PATCH" ]; then
+              NEXT_PATCH=0
+            else
+              NEXT_PATCH=$((LATEST_PATCH + 1))
+            fi
+          fi
+          FULL_VERSION="${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$NEXT_PATCH"
+
+          echo "🎯 Next version will be: v$FULL_VERSION"
+
+          # Set outputs
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "MAJOR=${{ env.VERSION_MAJOR }}" >> $GITHUB_OUTPUT
+          echo "MINOR=${{ env.VERSION_MINOR }}" >> $GITHUB_OUTPUT
+          echo "PATCH=$NEXT_PATCH" >> $GITHUB_OUTPUT
+
+          # Also set as environment variables for subsequent steps
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+
+  build:
+    name: '🛠️ Build, Test, Package'
+    runs-on: ubuntu-latest
+    needs: calculate-version
+    steps:
+      - name: '🔄 Checkout'
+        uses: actions/checkout@v5
+
+      - name: '🔧 Setup .NET'
+        uses: actions/setup-dotnet@v5
+        with:
+          config-file: ${{ github.workspace }}/global.json
+
+      # ============================ BUILD ============================
+      - name: '🔄 Restore'
+        run: dotnet restore ${{ github.workspace }}/${{ env.PROJECT_NAME }}.slnx
+
+      - name: '🔨 Build'
+        run: >
+          dotnet build ${{ github.workspace }}/${{ env.PROJECT_NAME }}.slnx
+          -c Release
+          --no-restore
+          -p:Version_Full=${{ needs.calculate-version.outputs.FULL_VERSION }}
+          -p:Version_Assembly=${{ needs.calculate-version.outputs.FULL_VERSION }}
+          -p:GeneratePackageOnBuild=true
+          -p:PackageOutputPath=${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Packages
+
+      - name: '📦 Upload NuGet packages'
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Packages
+          if-no-files-found: error
+
+      # ============================ TESTS & COVERAGE ============================
+      - name: '🧪 Test with coverage (95% min)'
+        run: >
+          dotnet test ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Tests/${{ env.PROJECT_NAME }}.Tests.csproj
+          -c Release
+          --no-build
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory "${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests"
+          -p:TestOutputPath="${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests"
+          -p:CollectCoverage=true
+          -p:CoverletOutputFormat=cobertura
+          '-p:Exclude="[xunit.*]*,[FluentAssertions.*]*,[${{ env.PROJECT_NAME }}.Tests]*"'
+
+      - name: '📦 Upload test artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests
+          path: |
+            ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests/coverage.cobertura.xml
+            ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests/test-results.trx
+
+      - name: '📊 Publish Test Results'
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        with:
+          files: |
+            ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests/test-results.trx
+
+      # ============================ DOCS ============================
+      - name: '📚 Install DocFX'
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ ! -f .config/dotnet-tools.json ]; then
+            echo "📝 Creating tool manifest..."
+            dotnet new tool-manifest
+          fi
+          dotnet tool install docfx
+
+      - name: '📚 Generate Documentation'
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "📚 Generating documentation..."
+          dotnet docfx metadata ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Docs/docfx.json --output ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Docs/api
+          dotnet docfx build ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Docs/docfx.json --output ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Docs/site
+
+      - name: "📦 Upload GitHub Pages artifact"
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Docs/site
+          name: github-pages
+
+  deploy-gh-pages:
+    name: '🚀 Deploy to GitHub Pages'
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  publish-nuget-org:
+    name: '🚀 Publish to NuGet.org'
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: nuget-org
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: '📦 Download NuGet packages'
+        uses: actions/download-artifact@v5
+        with:
+          name: packages
+          path: ${{ github.workspace }}/packages
+
+      - name: '📦 Push Packages to NuGet.org'
+        run: dotnet nuget push ${{ github.workspace }}/packages/*.nupkg --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+  tag-and-release:
+    name: '🏷️ Tag & Release'
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [calculate-version, publish-nuget-org, deploy-gh-pages]
+    steps:
+      - name: '🔄 Checkout'
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # ============================ TAGGING ============================
+      - name: '🏷️ Create tag'
+        run: |
+            echo "🏷️  Creating tag v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+
+            git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+            git config --local user.name "${{ github.actor }}"
+
+            if [ $(git tag -l "v${{ needs.calculate-version.outputs.FULL_VERSION }}") ]; then
+                echo "⚠️  Tag v${{ needs.calculate-version.outputs.FULL_VERSION }} already exists"
+                exit 1
+            else
+                echo "✅ Creating new tag v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+                git tag -a "v${{ needs.calculate-version.outputs.FULL_VERSION }}" -m "Release v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+                git push origin "v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+                echo "🚀 Tag v${{ needs.calculate-version.outputs.FULL_VERSION }} created and pushed"
+            fi
+
+      - name: '📀 Create Release'
+        run: |
+            echo "📀 Creating GitHub release for v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+
+            gh auth login --with-token <<< "${{ github.token }}"
+
+            # Check if release already exists
+            if gh release view "v${{ needs.calculate-version.outputs.FULL_VERSION }}" --repo ${{ github.repository }} >/dev/null 2>&1; then
+                echo "⚠️  Release v${{ needs.calculate-version.outputs.FULL_VERSION }} already exists"
+            else
+                echo "✅ Creating new release v${{ needs.calculate-version.outputs.FULL_VERSION }}"
+                gh release create "v${{ needs.calculate-version.outputs.FULL_VERSION }}" \
+                --title "Release v${{ needs.calculate-version.outputs.FULL_VERSION }}" \
+                --generate-notes \
+                --target "${{ github.sha }}" \
+                --repo ${{ github.repository }}
+                echo "🚀 Release v${{ needs.calculate-version.outputs.FULL_VERSION }} created successfully"
+            fi
