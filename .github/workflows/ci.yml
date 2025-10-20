@@ -35,63 +35,18 @@ defaults:
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: '1'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
-  VERSION_MAJOR: '1'
-  VERSION_MINOR: '0'
   PROJECT_NAME: Plugin.ExceptionListeners
 
 jobs:
-  calculate-version:
-    name: '🔍 Calculate Version'
-    runs-on: ubuntu-latest
-    outputs:
-      FULL_VERSION: ${{ steps.version.outputs.FULL_VERSION }}
-      MAJOR: ${{ steps.version.outputs.MAJOR }}
-      MINOR: ${{ steps.version.outputs.MINOR }}
-      PATCH: ${{ steps.version.outputs.PATCH }}
-    steps:
-      - name: '🔄 Checkout'
-        uses: actions/checkout@v5
-        with:
-          fetch-tags: true # https://github.com/actions/checkout/issues/1471#issuecomment-1771231294
-          fetch-depth: 0
-
-      # ============================ VERSION ============================
-      - name: '🔍 Calculate version'
-        id: version
-        run: |
-          echo "🔍 Calculating next version for ${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.x"
-
-          PATTERN="v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.*"
-          echo "📋 Looking for existing tags matching pattern: $PATTERN"
-
-          # List all matching tags for debugging
-          echo "🔍 All tags matching pattern:"
-          git tag -l "$PATTERN" || echo "No tags found"
-
-          TAGS=$(git tag -l "v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.*")
-          if [ -z "$TAGS" ]; then
-            echo "ℹ️  No existing tags found for ${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.x, starting with patch 0"
-            NEXT_PATCH=0
-          else
-            LATEST_PATCH=$(echo "$TAGS" | grep -E "^v${{ env.VERSION_MAJOR }}\.${{ env.VERSION_MINOR }}\.[0-9]+$" | sed "s/^v${{ env.VERSION_MAJOR }}\.${{ env.VERSION_MINOR }}\.//" | sort -n | tail -1)
-            if [ -z "$LATEST_PATCH" ]; then
-              NEXT_PATCH=0
-            else
-              NEXT_PATCH=$((LATEST_PATCH + 1))
-            fi
-          fi
-          FULL_VERSION="${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$NEXT_PATCH"
-
-          echo "🎯 Next version will be: v$FULL_VERSION"
-
-          # Set outputs
-          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_OUTPUT
-          echo "MAJOR=${{ env.VERSION_MAJOR }}" >> $GITHUB_OUTPUT
-          echo "MINOR=${{ env.VERSION_MINOR }}" >> $GITHUB_OUTPUT
-          echo "PATCH=$NEXT_PATCH" >> $GITHUB_OUTPUT
-
-          # Also set as environment variables for subsequent steps
-          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+  version:
+    uses: framinosona/github_actions/.github/workflows/reusable-version.yml@main
+    with:
+      config-file: "./.config/version.json"
+      output-txt: 'output/version/version.txt'
+      output-json: 'output/version/version.json'
+      output-props: 'output/version/version.props'
+      artifact-name: 'version'
+      show-summary: true
 
   build:
     name: '🛠️ Build, Test, Package'
@@ -100,6 +55,12 @@ jobs:
     steps:
       - name: '🔄 Checkout'
         uses: actions/checkout@v5
+
+      - name: ' Download Version artifact'
+        uses: actions/download-artifact@v5
+        with:
+          name: version
+          path: ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Version
 
       - name: '🔧 Setup .NET'
         uses: actions/setup-dotnet@v5
@@ -110,13 +71,21 @@ jobs:
       - name: '🔄 Restore'
         run: dotnet restore ${{ github.workspace }}/${{ env.PROJECT_NAME }}.slnx
 
+      - name: '🔧 Install Maui Workloads'
+        run: |
+          dotnet workload install                  \
+                              maui                 \
+                              maui-ios             \
+                              maui-android         \
+                              maui-windows         \
+                              maui-maccatalyst     \
+
       - name: '🔨 Build'
         run: >
           dotnet build ${{ github.workspace }}/${{ env.PROJECT_NAME }}.slnx
           -c Release
           --no-restore
-          -p:Version_Full=${{ needs.calculate-version.outputs.FULL_VERSION }}
-          -p:Version_Assembly=${{ needs.calculate-version.outputs.FULL_VERSION }}
+          -p:Version_Props_Path=${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Version/version.props
           -p:GeneratePackageOnBuild=true
           -p:PackageOutputPath=${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Packages
 
@@ -128,7 +97,7 @@ jobs:
           if-no-files-found: error
 
       # ============================ TESTS & COVERAGE ============================
-      - name: '🧪 Test with coverage (95% min)'
+      - name: '🧪 Test with coverage'
         run: >
           dotnet test ${{ github.workspace }}/${{ env.PROJECT_NAME }}.Tests/${{ env.PROJECT_NAME }}.Tests.csproj
           -c Release
