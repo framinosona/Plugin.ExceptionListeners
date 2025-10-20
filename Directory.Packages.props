@@ -11,9 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Plugin.ExceptionListeners" Version="$(Version_Full)" />
-
-    <PackageVersion Include="Plugin.ByteArrays" Version="1.0.20" />
-    <PackageVersion Include="Plugin.BaseTypeExtensions" Version="1.0.7" />
   </ItemGroup>
 
   <!-- ==================== CORE DEPENDENCIES ==================== -->
