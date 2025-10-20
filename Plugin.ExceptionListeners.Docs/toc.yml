@@ -1,0 +1,38 @@
+- name: Home
+  href: index.md
+- name: Getting Started
+  href: getting-started/
+  items:
+  - name: Installation
+    href: getting-started/installation.md
+  - name: Quick Start
+    href: getting-started/quick-start.md
+  - name: Configuration
+    href: getting-started/configuration.md
+- name: Guides
+  href: guides/
+  items:
+  - name: Exception Listeners
+    href: guides/exception-listeners.md
+  - name: MAUI Integration
+    href: guides/maui-integration.md
+  - name: Best Practices
+    href: guides/best-practices.md
+  - name: Performance Considerations
+    href: guides/performance.md
+- name: Examples
+  href: examples/
+  items:
+  - name: Basic Usage
+    href: examples/basic-usage.md
+  - name: Advanced Scenarios
+    href: examples/advanced-scenarios.md
+  - name: MAUI Applications
+    href: examples/maui-examples.md
+- name: Migration
+  href: migration/
+  items:
+  - name: Migration Guide
+    href: migration/index.md
+- name: API Reference
+  href: api/
