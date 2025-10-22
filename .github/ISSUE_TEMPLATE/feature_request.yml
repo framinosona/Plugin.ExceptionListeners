@@ -16,14 +16,15 @@ body:
       label: Feature Type
       description: What type of feature is this?
       options:
-        - "New method"
-        - "New functionality"
+        - "New API method/functionality"
         - "Performance optimization"
-        - "New data type conversion"
-        - "Array manipulation method"
-        - "Encoding/format support"
+        - "New data type support"
+        - "Error handling improvement"
+        - "Configuration option"
+        - "Integration support"
         - "API improvement"
         - "Documentation enhancement"
+        - "Developer experience"
         - "Other"
     validations:
       required: true
@@ -70,6 +71,19 @@ body:
     attributes:
       label: Example Usage
       description: Show how this feature would be used in code
+      placeholder: |
+        ```csharp
+        using YourNamespace;
+
+        // Example of how the new feature would be used
+        var input = GetSampleInput();
+
+        // Your proposed API usage here
+        var result = input.YourNewMethod();
+
+        // Expected behavior
+        Console.WriteLine($"Result: {result}");
+        ```
       render: csharp
     validations:
       required: false

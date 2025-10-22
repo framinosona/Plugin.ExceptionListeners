@@ -62,10 +62,10 @@ body:
       label: Location
       description: Where is this documentation issue located?
       placeholder: |
-        - File path: e.g., ./README.md
+        - File path: e.g., ./README.md, ./src/YourClass.cs
         - Section: e.g., "Usage Examples", "API Reference"
         - Line number (if applicable): e.g., Line 45
-        - URL (for GitHub Pages)
+        - URL (for GitHub Pages): e.g., https://framinosona.github.io/repository-name/
     validations:
       required: false
 

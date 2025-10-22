@@ -24,6 +24,14 @@ body:
     attributes:
       label: Code to Reproduce
       description: Provide minimal code that reproduces the issue
+      placeholder: |
+        ```csharp
+        using YourNamespace;
+
+        // Minimal code that demonstrates the bug
+        var input = "example input";
+        var result = input.SomeMethod(); // This causes the issue
+        ```
       render: csharp
     validations:
       required: true
