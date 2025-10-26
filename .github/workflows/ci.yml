@@ -125,10 +125,10 @@ jobs:
           no-build: true
           logger: 'trx;LogFileName=test-results.trx'
           results-directory: '${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests'
-          arguments: |
-            -p:TestOutputPath='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests' \
-            -p:CollectCoverage=true \
-            -p:CoverletOutputFormat=cobertura \
+          arguments: >
+            -p:TestOutputPath='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests'
+            -p:CollectCoverage=true
+            -p:CoverletOutputFormat=cobertura
             -p:CoverletOutput='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Tests/coverage.cobertura.xml'
           show-summary: true
 
