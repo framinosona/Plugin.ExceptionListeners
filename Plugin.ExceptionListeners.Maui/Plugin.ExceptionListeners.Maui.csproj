@@ -24,11 +24,8 @@
   </PropertyGroup>
 
   <!-- ==================== PACKAGE REFERENCES / DEPENDENCIES ==================== -->
-  <ItemGroup Condition=" '$(ContinuousIntegrationBuild)' != 'true' ">
+  <ItemGroup>
     <ProjectReference Include="..\Plugin.ExceptionListeners\Plugin.ExceptionListeners.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">
-    <PackageReference Include="Plugin.ExceptionListeners" />
   </ItemGroup>
 
 
