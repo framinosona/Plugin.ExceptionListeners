@@ -93,9 +93,9 @@ jobs:
           path: '${{ github.workspace }}/${{ env.PROJECT_NAME }}.slnx'
           configuration: Release
           no-restore: true
-          arguments: |
-            -p:Version_Props_Path='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Version/version.props' \
-            -p:GeneratePackageOnBuild=true \
+          arguments: >
+            -p:Version_Props_Path='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Version/version.props'
+            -p:GeneratePackageOnBuild=true
             -p:PackageOutputPath='${{ github.workspace }}/${{ env.PROJECT_NAME }}.Output/Packages'
           show-summary: true
 
