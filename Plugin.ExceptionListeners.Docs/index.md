@@ -293,11 +293,11 @@ public class FilteringExceptionHandler
 
 ## 📄 License
 
-This library is licensed under the **MIT License** - see the [LICENSE.md](https://github.com/framinosona/Plugin.ExceptionListeners/blob/main/LICENSE.md) file for details.
+This library is licensed under the **MIT License** - see the [LICENSE.md](https://github.com/laerdal/Plugin.ExceptionListeners/blob/main/LICENSE.md) file for details.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on [GitHub](https://github.com/framinosona/Plugin.ExceptionListeners).
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on [GitHub](https://github.com/laerdal/Plugin.ExceptionListeners).
 
 ### Development Setup
 
@@ -309,7 +309,7 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 
 ## 🔗 Related Resources
 
-- [GitHub Repository](https://github.com/framinosona/Plugin.ExceptionListeners)
+- [GitHub Repository](https://github.com/laerdal/Plugin.ExceptionListeners)
 - [API Reference](api/index.md)
 - [Samples and Examples](examples/index.md)
 - [Migration Guide](migration/index.md)

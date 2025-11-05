@@ -525,7 +525,7 @@ private void HandleException(object? sender, ExceptionEventArgs e)
 
 If you encounter issues during migration:
 
-1. Check the [GitHub Issues](https://github.com/framinosona/Plugin.ExceptionListeners/issues)
+1. Check the [GitHub Issues](https://github.com/laerdal/Plugin.ExceptionListeners/issues)
 2. Review the [API documentation](../api/index.md)
 3. Look at [example implementations](../examples/basic-usage.md)
 4. Create a new issue with:

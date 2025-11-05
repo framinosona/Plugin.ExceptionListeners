@@ -119,7 +119,7 @@ var nativeListener = new NativeUnhandledExceptionListener(
 
 If you encounter issues during installation:
 
-1. Check the [GitHub Issues](https://github.com/framinosona/Plugin.ExceptionListeners/issues) page
+1. Check the [GitHub Issues](https://github.com/laerdal/Plugin.ExceptionListeners/issues) page
 2. Review the troubleshooting section in our documentation
 3. Create a new issue with:
    - Your development environment details

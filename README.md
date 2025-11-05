@@ -2,17 +2,17 @@
 
 <div align="center">
 
-[![Icon](icon.png)](https://github.com/framinosona/Plugin.ExceptionListeners)
+[![Icon](icon.png)](https://github.com/laerdal/Plugin.ExceptionListeners)
 
 </div>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/framinosona/Plugin.ExceptionListeners/ci.yml?logo=github)](https://github.com/framinosona/Plugin.ExceptionListeners/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/laerdal/Plugin.ExceptionListeners/ci.yml?logo=github)](https://github.com/laerdal/Plugin.ExceptionListeners/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![NuGet](https://img.shields.io/nuget/v/Plugin.ExceptionListeners?logo=nuget&color=004880)](https://www.nuget.org/packages/Plugin.ExceptionListeners)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Plugin.ExceptionListeners?logo=nuget&color=004880)](https://www.nuget.org/packages/Plugin.ExceptionListeners)
-[![GitHub Release](https://img.shields.io/github/v/release/framinosona/Plugin.ExceptionListeners?logo=github)](https://github.com/framinosona/Plugin.ExceptionListeners/releases)
-[![License](https://img.shields.io/github/license/framinosona/Plugin.ExceptionListeners?color=blue)](LICENSE.md)
-[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github)](https://framinosona.github.io/Plugin.ExceptionListeners/)
+[![GitHub Release](https://img.shields.io/github/v/release/laerdal/Plugin.ExceptionListeners?logo=github)](https://github.com/laerdal/Plugin.ExceptionListeners/releases)
+[![License](https://img.shields.io/github/license/laerdal/Plugin.ExceptionListeners?color=blue)](LICENSE.md)
+[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github)](https://laerdal.github.io/Plugin.ExceptionListeners/)
 
 A comprehensive exception listening framework for .NET applications, providing unified exception handling across different exception sources and MAUI cross-platform applications.
 

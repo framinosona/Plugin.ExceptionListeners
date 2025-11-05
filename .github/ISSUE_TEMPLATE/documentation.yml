@@ -65,7 +65,7 @@ body:
         - File path: e.g., ./README.md, ./src/YourClass.cs
         - Section: e.g., "Usage Examples", "API Reference"
         - Line number (if applicable): e.g., Line 45
-        - URL (for GitHub Pages): e.g., https://framinosona.github.io/repository-name/
+        - URL (for GitHub Pages): e.g., https://laerdal.github.io/repository-name/
     validations:
       required: false
 
